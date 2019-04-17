@@ -40,7 +40,9 @@ def get_trial_info(summary, pop_history):
             {
                 "individual": idxs,
                 "nrows": nrows,
-                "ncols": ncols, "memory": sizes, "generation": gen
+                "ncols": ncols,
+                "memory": sizes,
+                "generation": gen,
             }
         )
         info_dfs.append(info)

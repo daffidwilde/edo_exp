@@ -6,7 +6,10 @@ import sys
 
 
 def main(
-    num_cores=8, sizes=[100, 500, 1000], mutations=[0.001, 0.01, 0.05], repetitions=50
+    num_cores=8,
+    sizes=[100, 500, 1000],
+    mutations=[0.001, 0.01, 0.05],
+    repetitions=50,
 ):
     """ Write a bash script with the parameters for a series of runs. """
 

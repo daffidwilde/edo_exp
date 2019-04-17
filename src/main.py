@@ -1,7 +1,7 @@
 """ Main function for a run of an experiment. """
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from dask.distributed import Client
 from dask_jobqueue import SLURMCluster
@@ -9,7 +9,6 @@ from dask_jobqueue import SLURMCluster
 from summarise import summarise_trial
 from tar import make_tarball
 from trial import run_trial
-
 
 ROOT = "/scratch/c.c1420099/edo_kmeans"
 
