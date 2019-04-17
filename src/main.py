@@ -3,9 +3,6 @@
 import sys
 from pathlib import Path
 
-from dask.distributed import Client
-from dask_jobqueue import SLURMCluster
-
 from summarise import summarise_trial
 from tar import make_tarball
 from trial import run_trial
@@ -42,19 +39,4 @@ if __name__ == "__main__":
     MUTATION = float(sys.argv[4])
     SEED = int(sys.argv[5])
 
-    CLUSTER = SLURMCluster(
-        queue="compute",
-        project="scw1337",
-        walltime="23:59:59",
-        name=f"edo_kmeans_{CASE}",
-        cores=NUM_CORES,
-        memory=f"{4 * NUM_CORES}GB",
-        local_directory="/scratch/c.c1420099/tmp/",
-    )
-
-    with open(ROOT + "/job_script.sh", "w") as job:
-        job.write(CLUSTER.job_script())
-
-    CLIENT = Client(CLUSTER)
     main(NUM_CORES, CASE, SIZE, MUTATION, SEED)
-    CLIENT.close()

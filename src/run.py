@@ -12,13 +12,7 @@ def get_arguments(args, idx):
     return next(iter_args, "STOP")
 
 
-def main(
-    idx=0,
-    num_cores=8,
-    sizes=[100, 500, 1000],
-    mutations=[0.001, 0.01, 0.05],
-    repetitions=50,
-):
+def main(idx, num_cores, sizes, mutations, repetitions):
     """ Write a bash script with the parameters for a series of runs. """
 
     cases = ["bounded", "unbounded"]
@@ -34,15 +28,17 @@ def main(
     cores, case, size, mutation, seed = arguments
     with open("run.sh", "w") as bash:
 
-        JOBSCRIPT = "!/bin/bash --login\n\n"\
-            + f"#SBATCH -J edo_kmeans_{case}\n"\
-            + f"#SBATCH --ntasks={cores}\n"\
-            + f"#SBATCH --ntasks-per-node={cores}\n"\
-            + "#SBATCH -A scw1337\n"\
-            + "#SBATCH -p compute\n"\
-            + "#SBATCH -t 23:59:59\n"\
+        jobscript = (
+            "#!/bin/bash --login\n\n"
+            + f"#SBATCH -J edo_kmeans_{case}\n"
+            + f"#SBATCH --ntasks={cores}\n"
+            + f"#SBATCH --ntasks-per-node={cores}\n"
+            + "#SBATCH -A scw1337\n"
+            + "#SBATCH -p compute\n"
+            + "#SBATCH -t 23:59:59\n"
             + "#SBATCH --exclusive\n\n"
-        bash.write(JOBSCRIPT)
+        )
+        bash.write(jobscript)
 
         bash.write("export THIS_SCRATCH=/scratch/$USER/$SLURM_JOBID\n")
         bash.write("rm -rf $THIS_SCRATCH\n")
@@ -56,6 +52,9 @@ def main(
 
         bash.write("cd src\n")
         bash.write(f"python main.py {cores} {case} {size} {mutation} {seed}\n")
+
+        bash.write("conda deactivate\n")
+        bash.write("conda env remove -n edo-kmeans")
 
     os.system("chmod +x run.sh")
     os.system("./run.sh")
