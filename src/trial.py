@@ -1,8 +1,9 @@
 """ Functions to define and run a trial. """
 
 from sklearn.cluster import KMeans
-from edo.pdfs import Uniform
+
 import edo
+from edo.pdfs import Uniform
 
 
 def kmeans_fitness(dataframe, seed):
