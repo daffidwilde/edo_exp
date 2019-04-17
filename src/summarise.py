@@ -49,7 +49,7 @@ def get_trial_info(summary, pop_history):
     info.to_csv(summary / "info.csv", index=False)
 
 
-def summarise(root, pop_history, fit_history):
+def summarise_trial(root, pop_history, fit_history):
     """ Summarise a run of an experiment by investigating the shape/size of the
     individuals created, and finding some descriptive individuals in the final
     population. """

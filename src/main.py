@@ -6,9 +6,9 @@ import sys
 from dask.distributed import Client
 from dask_jobqueue import SLURMCluster
 
-from .summarise import summarise
-from .tar import make_tarball
-from .trial import run_trial
+from summarise import summarise_trial
+from tar import make_tarball
+from trial import run_trial
 
 
 ROOT = "/scratch/c.c1420099/edo_kmeans"
@@ -18,10 +18,10 @@ def main(num_cores, case, size, mutation, seed):
     """ Run a trial, summarise it, then compress the trial to a tarball and
     delete the original data. """
 
-    root = Path(ROOT) / case / f"size_{size}_mu_{mutation}" / seed
+    root = Path(ROOT) / case / f"size_{size}_mu_{mutation}" / str(seed)
 
     if case == "bounded":
-        row_limits = [[100, 1000]]
+        row_limits = [100, 1000]
         col_limits = [2, 2]
     elif case == "unbounded":
         row_limits = [1000, 100000]
@@ -31,7 +31,7 @@ def main(num_cores, case, size, mutation, seed):
         num_cores, root, size, row_limits, col_limits, mutation, seed
     )
 
-    summarise(root, pop_history, fit_history)
+    summarise_trial(root, pop_history, fit_history)
     make_tarball(root)
 
 
@@ -48,7 +48,8 @@ if __name__ == "__main__":
         project="scw1337",
         walltime="23:59:59",
         name=f"edo_kmeans_{CASE}",
-        processes=NUM_CORES,
+        cores=NUM_CORES,
+        memory=f"{4 * NUM_CORES}GB",
         local_directory="/scratch/c.c1420099/tmp/",
     )
 
