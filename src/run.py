@@ -6,6 +6,15 @@ import sys
 from pathlib import Path
 
 
+def get_idx(path):
+    """ Get the last used index. """
+
+    with open(path, "r") as idx_file:
+        idx = int(idx_file.read())
+
+    return idx
+
+
 def make_dirs(root):
     """ Make job and data directories. """
 
@@ -30,19 +39,23 @@ def get_job_files(job_dir, case, size, mut, seed):
     return name, job, out, err
 
 
-def main(num_cores, sizes, mutations, repetitions):
+def main(num_cores, sizes, mutations, repetitions, idx=None):
     """ Write and submit bash scripts with the parameters for a series of runs.
     """
 
-    job_dir = make_dirs(os.getcwd())
+    if idx is None:
+        idx = get_idx("idx.txt")
 
-    for cores, case, size, mut, seed in itertools.product(
+    job_dir = make_dirs(os.getcwd())
+    args = itertools.product(
         [num_cores],
         ["bounded", "unbounded"],
         sizes,
         mutations,
         range(repetitions),
-    ):
+    )
+
+    for cores, case, size, mut, seed in itertools.islice(args, idx, None):
 
         job_name, job_file, out_file, err_file = get_job_files(
             job_dir, case, size, mut, seed
@@ -53,7 +66,7 @@ def main(num_cores, sizes, mutations, repetitions):
 
             job.write("#SBATCH -A scw1337\n")
             job.write("#SBATCH -p compute\n")
-            job.write("#SBATCH -t 24:00:00\n")
+            job.write("#SBATCH -t 48:00:00\n")
             job.write("#SBATCH --exclusive\n")
             job.write(f"#SBATCH --job-name={job_name}\n")
             job.write(f"#SBATCH -o {out_file}\n")
@@ -69,8 +82,8 @@ def main(num_cores, sizes, mutations, repetitions):
 
             job.write("conda deactivate\n")
 
-        os.system(f"sbatch {job_file}")
- 
+        os.system(f"sbatch {job_file} && echo > idx.txt")
+
 
 if __name__ == "__main__":
 
@@ -79,4 +92,8 @@ if __name__ == "__main__":
     MUTATIONS = list(sys.argv[3].split(","))
     REPETITIONS = int(sys.argv[4])
 
-    main(NUM_CORES, SIZES, MUTATIONS, REPETITIONS)
+    IDX = None
+    if len(sys.argv) == 6:
+        IDX = int(sys.argv[5])
+
+    main(NUM_CORES, SIZES, MUTATIONS, REPETITIONS, IDX)
