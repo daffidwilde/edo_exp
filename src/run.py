@@ -59,7 +59,7 @@ def main(num_cores, sizes, mutations, repetitions):
             job.write(f"#SBATCH -o {out_file}\n")
             job.write(f"#SBATCH -e {err_file}\n")
             job.write(f"#SBATCH --ntasks={cores}\n")
-            job.write(f"#SBATCH --ntasks-per-node={cores}\n\n")
+            job.write(f"#SBATCH --ntasks-per-node={int(cores / 2)}\n\n")
 
             job.write("module load anaconda\n")
             job.write("source activate edo-kmeans\n\n")
