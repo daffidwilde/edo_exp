@@ -31,7 +31,8 @@ def get_job_files(job_dir, case, size, mut, seed):
 
 
 def main(num_cores, sizes, mutations, repetitions):
-    """ Write a bash script with the parameters for a series of runs. """
+    """ Write and submit bash scripts with the parameters for a series of runs.
+    """
 
     job_dir = make_dirs(os.getcwd())
 
