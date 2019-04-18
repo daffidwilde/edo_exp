@@ -58,7 +58,7 @@ def main(num_cores, sizes, mutations, repetitions):
             job.write(f"#SBATCH --job-name={job_name}\n")
             job.write(f"#SBATCH -o {out_file}\n")
             job.write(f"#SBATCH -e {err_file}\n")
-            job.write(f"#SBATCH --n-tasks={cores}\n")
+            job.write(f"#SBATCH --ntasks={cores}\n")
             job.write(f"#SBATCH --ntasks-per-node={cores}\n\n")
 
             job.write("module load anaconda\n")
