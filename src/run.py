@@ -74,7 +74,7 @@ def main(num_cores, sizes, mutations, repetitions):
 
 if __name__ == "__main__":
 
-    NUM_CORES = sys.argv[1]
+    NUM_CORES = int(sys.argv[1])
     SIZES = list(sys.argv[2].split(","))
     MUTATIONS = list(sys.argv[3].split(","))
     REPETITIONS = int(sys.argv[4])
