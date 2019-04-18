@@ -70,13 +70,14 @@ def main(num_cores, sizes, mutations, repetitions):
             job.write("conda deactivate\n")
 
         os.system(f"sbatch {job_file}")
-
+ 
 
 if __name__ == "__main__":
 
-    NUM_CORES = sys.argv[1]
-    SIZES = list(sys.argv[2].split(","))
-    MUTATIONS = list(sys.argv[3].split(","))
-    REPETITIONS = int(sys.argv[4])
+    IDX = int(sys.argv[1])
+    NUM_CORES = sys.argv[2]
+    SIZES = list(sys.argv[3].split(","))
+    MUTATIONS = list(sys.argv[4].split(","))
+    REPETITIONS = int(sys.argv[5])
 
-    main(NUM_CORES, SIZES, MUTATIONS, REPETITIONS)
+    main(IDX, NUM_CORES, SIZES, MUTATIONS, REPETITIONS)
