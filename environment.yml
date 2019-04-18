@@ -13,4 +13,3 @@ dependencies:
   - pip:
     - edo==0.2
 prefix: /Users/henrywilde/anaconda3/envs/edo-kmeans
-

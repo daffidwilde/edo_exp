@@ -3,64 +3,74 @@
 import itertools
 import os
 import sys
+from pathlib import Path
 
 
-def get_arguments(args, idx):
-    """ Get the set of arguments at index `idx`. """
+def make_dirs(root):
+    """ Make job and data directories. """
 
-    iter_args = iter(itertools.islice(args, idx, None))
-    return next(iter_args, "STOP")
+    job_dir = Path(f"{root}/.job")
+    data_dir = Path(f"/scratch/c.c1420099/edo_kmeans")
+
+    job_dir.mkdir(exist_ok=True)
+    data_dir.mkdir(exist_ok=True, parents=True)
+
+    return job_dir
 
 
-def main(idx, num_cores, sizes, mutations, repetitions):
-    """ Write a bash script with the parameters for a series of runs. """
+def get_job_files(job_dir, case, size, mut, seed):
+    """ Get the name of, and files needed to run, the job. """
 
-    cases = ["bounded", "unbounded"]
-    args = itertools.product(
-        [num_cores], cases, sizes, mutations, range(repetitions)
-    )
+    mut_str = str(mut).split(".")[-1]
+    name = f"edo_{case}_{size}_{mut_str}_{seed}"
+    job = job_dir / f"{name}.job"
+    out = job_dir / f"{name}.out"
+    err = job_dir / f"{name}.err"
 
-    arguments = get_arguments(args, idx)
+    return name, job, out, err
 
-    if arguments == "STOP":
-        return
 
-    cores, case, size, mutation, seed = arguments
-    with open("run.sh", "w") as bash:
+def main(num_cores, sizes, mutations, repetitions):
+    """ Write and submit bash scripts with the parameters for a series of runs.
+    """
 
-        jobscript = (
-            "#!/bin/bash --login\n\n"
-            + f"#SBATCH -J edo_kmeans_{case}\n"
-            + f"#SBATCH --ntasks={cores}\n"
-            + f"#SBATCH --ntasks-per-node={cores}\n"
-            + "#SBATCH -A scw1337\n"
-            + "#SBATCH -p compute\n"
-            + "#SBATCH -t 23:59:59\n"
-            + "#SBATCH --exclusive\n\n"
+    job_dir = make_dirs(os.getcwd())
+
+    for cores, case, size, mut, seed in itertools.product(
+        [num_cores],
+        ["bounded", "unbounded"],
+        sizes,
+        mutations,
+        range(repetitions),
+    ):
+
+        job_name, job_file, out_file, err_file = get_job_files(
+            job_dir, case, size, mut, seed
         )
-        bash.write(jobscript)
 
-        bash.write("export THIS_SCRATCH=/scratch/$USER/$SLURM_JOBID\n")
-        bash.write("rm -rf $THIS_SCRATCH\n")
-        bash.write("mkdir -p $THIS_SCRATCH\n")
-        bash.write("cd $THIS_SCRATCH\n")
-        bash.write("cp -r $SLURM_SUBMIT_DIR/.. .\n\n")
+        with open(job_file, "w") as job:
+            job.write("#!/bin/bash --login\n\n")
 
-        bash.write("module load anaconda\n")
-        bash.write("conda env create -f ../environment.yml\n")
-        bash.write("source activate edo-kmeans\n\n")
+            job.write("#SBATCH -A scw1337\n")
+            job.write("#SBATCH -p compute\n")
+            job.write("#SBATCH -t 24:00:00\n")
+            job.write("#SBATCH --exclusive\n")
+            job.write(f"#SBATCH --job-name={job_name}\n")
+            job.write(f"#SBATCH -o {out_file}\n")
+            job.write(f"#SBATCH -e {err_file}\n")
+            job.write(f"#SBATCH --n-tasks={cores}\n")
+            job.write(f"#SBATCH --ntasks-per-node={cores}\n\n")
 
-        bash.write("cd src\n")
-        bash.write(f"python main.py {cores} {case} {size} {mutation} {seed}\n")
+            job.write("module load anaconda\n")
+            job.write("source activate edo-kmeans\n\n")
 
-        bash.write("conda deactivate\n")
-        bash.write("conda env remove -n edo-kmeans")
+            job.write("cd $HOME/src/edo_kmeans/src\n")
+            job.write(f"python main.py {cores} {case} {size} {mut} {size}\n\n")
 
-    os.system("chmod +x run.sh")
-    os.system("./run.sh")
+            job.write("conda deactivate\n")
 
-    main(idx + 1, num_cores, sizes, mutations, repetitions)
-
+        os.system(f"sbatch {job_file}")
+ 
 
 if __name__ == "__main__":
 
