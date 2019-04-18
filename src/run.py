@@ -74,10 +74,9 @@ def main(num_cores, sizes, mutations, repetitions):
 
 if __name__ == "__main__":
 
-    IDX = int(sys.argv[1])
-    NUM_CORES = sys.argv[2]
-    SIZES = list(sys.argv[3].split(","))
-    MUTATIONS = list(sys.argv[4].split(","))
-    REPETITIONS = int(sys.argv[5])
+    NUM_CORES = sys.argv[1]
+    SIZES = list(sys.argv[2].split(","))
+    MUTATIONS = list(sys.argv[3].split(","))
+    REPETITIONS = int(sys.argv[4])
 
-    main(IDX, NUM_CORES, SIZES, MUTATIONS, REPETITIONS)
+    main(NUM_CORES, SIZES, MUTATIONS, REPETITIONS)
