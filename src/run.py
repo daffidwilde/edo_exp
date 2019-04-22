@@ -55,8 +55,9 @@ def main(num_cores, sizes, mutations, repetitions, idx=None):
         range(repetitions),
     )
 
-    for cores, case, size, mut, seed in itertools.islice(args, idx, None):
-
+    for idx, (cores, case, size, mut, seed) in enumerate(
+        itertools.islice(args, idx, None)
+    ):
         job_name, job_file, out_file, err_file = get_job_files(
             job_dir, case, size, mut, seed
         )
@@ -82,7 +83,13 @@ def main(num_cores, sizes, mutations, repetitions, idx=None):
 
             job.write("conda deactivate\n")
 
-        os.system(f"sbatch {job_file} && echo > idx.txt")
+        code = os.system(f"sbatch {job_file}")
+        if code == 0:
+            os.system(f"echo {idx} > idx.txt")
+            continue
+        else:
+            print(f"Job limit reached. Last index {idx}")
+            break
 
 
 if __name__ == "__main__":
