@@ -58,7 +58,6 @@ def main(num_cores, sizes, mutations, repetitions, idx=None):
     for idx, (cores, case, size, mut, seed) in enumerate(
         itertools.islice(args, idx, None)
     ):
-
         job_name, job_file, out_file, err_file = get_job_files(
             job_dir, case, size, mut, seed
         )
