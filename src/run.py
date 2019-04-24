@@ -84,10 +84,8 @@ def main(num_cores, sizes, mutations, repetitions, idx=None):
             job.write("conda deactivate\n")
 
         code = os.system(f"sbatch {job_file}")
-        if code == 0:
-            os.system(f"echo {idx} > idx.txt")
-            continue
-        else:
+        os.system(f"echo {idx} > idx.txt")
+        if code != 0:
             print(f"Job limit reached. Last index {idx}")
             break
 
