@@ -5,34 +5,36 @@ import sys
 import tarfile
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from edo.run import _get_pop_history
 
 
-def get_extremes(root, fitness, max_gen):
+def get_extremes(trial, fitness, max_gen):
     """ Get the best, median and worst performing individuals in the final
     population. Write them to file. """
 
     fit = fitness[fitness["generation"] == max_gen]
-    best_idx = fit.nsmallest(1, "fitness")["individual"].compute().iloc[0]
-    worst_idx = fit.nlargest(1, "fitness")["individual"].compute().iloc[0]
+    best_idx = np.argmin(fit["fitness"].values)
+    worst_idx = np.argmax(fit["fitness"].values)
 
-    fit["diff"] = fit["fitness"] - fit["fitness"].quantile()
-    median_idx = fit.nsmallest(1, "diff")["individual"].compute().iloc[0]
+    median = np.median(fit["fitness"])
+    diff = fit["fitness"] - median
+    median_idx = np.argmin(diff.values)
 
     for idx, case in zip(
         [best_idx, median_idx, worst_idx], ["best", "median", "worst"]
     ):
 
-        path = root / "summary" / case
-        os.system(f"cp -r {root}/{max_gen}/{idx} {path}")
+        path = trial / "summary" / case
+        os.system(f"cp -r {trial}/data/{max_gen}/{idx} {path}")
 
 
 def get_trial_info(data, summary, max_gen):
     """ Traverse the trial history and summarise some basic information about
     the individual datasets that have been generated. """
 
-    pop_history = _get_pop_history(data, max_gen)
+    pop_history = _get_pop_history(data, max_gen + 1)
 
     info_dfs = []
     for gen, generation in enumerate(pop_history):
