@@ -30,7 +30,7 @@ def get_extremes(trial, fitness, max_gen):
         os.system(f"cp -r {trial}/data/{max_gen}/{idx} {path}")
 
 
-def get_trial_info(data, summary, max_gen):
+def get_trial_info(data, summary, max_gen, fitness):
     """ Traverse the trial history and summarise some basic information about
     the individual datasets that have been generated. """
 
@@ -57,6 +57,7 @@ def get_trial_info(data, summary, max_gen):
         info_dfs.append(info)
 
     info = pd.concat(info_dfs, axis=0, ignore_index=True)
+    info["fitness"] = fitness["fitness"]
     info.to_csv(summary / "main.csv", index=False)
 
 
@@ -79,9 +80,8 @@ def summarise_trial(trial, fitness, max_gen, size):
         summary = trial / "summary"
         summary.mkdir(exist_ok=True)
 
-        fitness.to_csv(summary / "fitness.csv")
         get_extremes(trial, fitness, max_gen)
-        get_trial_info(data, summary, max_gen)
+        get_trial_info(data, summary, max_gen, fitness)
         make_tarball(data)
         print(trial, "summarised.")
 
