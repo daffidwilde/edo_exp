@@ -3,8 +3,6 @@
 import sys
 from pathlib import Path
 
-from summarise import summarise_trial
-from tar import make_tarball
 from trial import run_trial
 
 ROOT = "/scratch/c.c1420099/edo_kmeans"
@@ -15,6 +13,7 @@ def main(num_cores, case, size, mutation, seed):
     delete the original data. """
 
     root = Path(ROOT) / case / f"size_{size}_mu_{mutation}" / str(seed)
+    root.mkdir(exist_ok=True, parents=True)
 
     if case == "bounded":
         row_limits = [100, 1000]
@@ -23,13 +22,7 @@ def main(num_cores, case, size, mutation, seed):
         row_limits = [1000, 100000]
         col_limits = [5, 100]
 
-    pop_history, fit_history = run_trial(
-        num_cores, root, size, row_limits, col_limits, mutation, seed
-    )
-
-    summarise_trial(root, pop_history, fit_history)
-    make_tarball(root)
-
+    run_trial(num_cores, root, size, row_limits, col_limits, mutation, seed)
 
 if __name__ == "__main__":
 
