@@ -18,10 +18,10 @@ def get_idx(path):
 def make_dirs(root):
     """ Make job and data directories. """
 
-    job_dir = Path(f"{root}/.job")
+    job_dir = Path(f"{root}/job")
     data_dir = Path(f"/scratch/c.c1420099/edo_kmeans")
 
-    job_dir.mkdir(exist_ok=True)
+    job_dir.mkdir(exist_ok=True, parents=True)
     data_dir.mkdir(exist_ok=True, parents=True)
 
     return job_dir

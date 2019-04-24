@@ -21,6 +21,7 @@ def run_trial(num_cores, root, size, row_limits, col_limits, mutation, seed):
     return the histories. """
 
     data = root / "data"
+    data.mkdir(exist_ok=True)
 
     pop_history, fit_history = edo.run_algorithm(
         fitness=kmeans_fitness,
