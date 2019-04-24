@@ -60,15 +60,13 @@ def get_trial_info(data, summary, max_gen):
     info.to_csv(summary / "main.csv", index=False)
 
 
-def make_tarball(root):
+def make_tarball(data):
     """ Compress the data in `root` to a tarball and remove the original. """
 
-    data = root / "data"
-
-    with tarfile.open(root + ".tar.gz", "w:gz") as tar:
+    with tarfile.open(str(data) + ".tar.gz", "w:gz") as tar:
         tar.add(data, arcname=os.path.basename(data))
 
-    os.system(f"rm -r {data}")
+    os.system(f"rm -rf {str(data)}")
 
 
 def summarise_trial(trial, fitness, max_gen, size):
@@ -85,9 +83,10 @@ def summarise_trial(trial, fitness, max_gen, size):
         get_extremes(trial, fitness, max_gen)
         get_trial_info(data, summary, max_gen)
         make_tarball(data)
+        print(trial, "summarised.")
 
-        return trial, "summarised."
-    return trial, "incomplete. Moving on."
+    else:
+        print(trial, "incomplete. Moving on.")
 
 
 def main(max_gen):
