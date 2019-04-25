@@ -11,5 +11,5 @@ dependencies:
   - scikit-learn=0.20.3
   - yaml=0.1.7
   - pip:
-    - edo==0.2
+    - edo==0.2.1
 prefix: /Users/henrywilde/anaconda3/envs/edo-kmeans
