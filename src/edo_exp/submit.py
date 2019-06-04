@@ -52,7 +52,7 @@ def main(
     """ Write and submit bash scripts with the parameters for a series of runs,
     stopping when the job limit has been reached. """
 
-    index_path = f"$HOME/experiments/{name}/idx.txt"
+    index_path = f"/home/c.c1420099/experiments/{name}/idx.txt"
     if index is None:
         index = get_idx(index_path)
 
