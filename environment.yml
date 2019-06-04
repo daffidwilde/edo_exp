@@ -1,4 +1,4 @@
-name: edo-kmeans
+name: edo-exp
 channels:
   - conda-forge
   - defaults
@@ -12,4 +12,4 @@ dependencies:
   - yaml=0.1.7
   - pip:
     - edo==0.2.1
-prefix: /Users/henrywilde/anaconda3/envs/edo-kmeans
+prefix: /Users/henrywilde/anaconda3/envs/edo-exp

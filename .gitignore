@@ -1,4 +1,9 @@
+*.csv
 .DS_Store
+*.egg-info*
+*.ipynb_checkpoints
+*.meta
 *pyc*
 *.sh
 *.swp
+*.tar.gz

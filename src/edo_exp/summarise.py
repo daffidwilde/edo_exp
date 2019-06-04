@@ -27,7 +27,7 @@ def get_extremes(trial, fitness, max_gen):
     ):
 
         path = trial / "summary" / case
-        os.system(f"cp -r {trial}/data/{max_gen}/{idx} {path}")
+        os.system(f"cp -r {trial}/data/{max_gen}/{idx}/* {path}")
 
 
 def get_trial_info(data, summary, max_gen, fitness):
@@ -89,37 +89,38 @@ def summarise_trial(trial, fitness, max_gen, size):
         print(trial, "incomplete. Moving on.")
 
 
-def main(max_gen):
-    """ Crawl through the `root` directory and if a trial has been completed,
-    summarise the data and make a tarball of it. Otherwise, move on. """
+def main(name, max_gen):
+    """ Crawl through the `root` directory of an experiment and if a trial has
+    been completed, summarise the data and make a tarball of it. Otherwise, move
+    on. """
 
-    for case in ["bounded", "unbounded"]:
-        root = Path("/scratch/c.c1420099/edo_kmeans") / case
+    root = Path(f"/scratch/c.c1420099/edo/{name}")
 
-        try:
-            experiments = (
-                path
-                for path in root.iterdir()
-                if path.is_dir()
-                and path.name.startswith("size")
-            )
+    try:
+        experiments = (
+            path
+            for path in root.iterdir()
+            if path.is_dir() and path.name.startswith("size")
+        )
 
-            for experiment in experiments:
-                size = int(experiment.name.split("_")[1])
-                trials = (
-                    path for path in experiment.iterdir() if path.is_dir()
-                )
-                for trial in trials:
-                    try:
-                        data = trial / "data"
-                        fitness = pd.read_csv(data / "fitness.csv")
-                        summarise_trial(trial, fitness, max_gen, size)
-                    except FileNotFoundError:
-                        print(trial, "already summarised.")
-        except FileNotFoundError:
-            print(case, "not begun yet.")
+        for experiment in experiments:
+            size = int(experiment.name.split("_")[1])
+            trials = (path for path in experiment.iterdir() if path.is_dir())
+
+            for trial in trials:
+
+                try:
+                    data = trial / "data"
+                    fitness = pd.read_csv(data / "fitness.csv")
+                    summarise_trial(trial, fitness, max_gen, size)
+                except FileNotFoundError:
+                    print(trial, "already summarised.")
+
+    except FileNotFoundError:
+        print("Not begun yet.")
 
 
 if __name__ == "__main__":
-    MAX_GEN = int(sys.argv[1])
-    main(MAX_GEN)
+    NAME = str(sys.argv[1])
+    MAX_GEN = int(sys.argv[2])
+    main(NAME, MAX_GEN)
