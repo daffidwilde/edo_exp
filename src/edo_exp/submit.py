@@ -82,7 +82,7 @@ def main(
             job.write(f"#SBATCH --ntasks-per-node={int(cores / 2)}\n\n")
 
             job.write("module load anaconda\n")
-            job.write("source activate edo-kmeans\n\n")
+            job.write("source activate edo-exp\n\n")
 
             job.write(f"cd $HOME/experiments/{name}\n")
             job.write(
