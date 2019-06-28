@@ -10,24 +10,25 @@ import pandas as pd
 from edo.run import _get_pop_history
 
 
-def get_extremes(trial, fitness, max_gen):
-    """ Get the best, median and worst performing individuals in the final
-    population. Write them to file. """
+def get_extremes(trial, fitness):
+    """ Get the individuals corresponding to the minimum, median and maximum
+    fitness values across all generations, and write them to file. """
 
-    fit = fitness[fitness["generation"] == max_gen]
-    best_idx = np.argmin(fit["fitness"].values)
-    worst_idx = np.argmax(fit["fitness"].values)
+    values = fitness["fitness"].values
 
-    median = np.median(fit["fitness"])
-    diff = fit["fitness"] - median
-    median_idx = np.argmin(diff.values)
+    min_idx = values.argmin()
+    max_idx = values.argmax()
+
+    diff = values - np.median(values)
+    median_idx = diff.argmin()
 
     for idx, case in zip(
-        [best_idx, median_idx, worst_idx], ["best", "median", "worst"]
+        [min_idx, median_idx, max_idx], ["min", "median", "max"]
     ):
 
+        ind, gen = fitness[["individual", "generation"]].iloc[idx, :]
         path = trial / "summary" / case
-        os.system(f"cp -r {trial}/data/{max_gen}/{idx}/* {path}")
+        os.system(f"cp -r {trial}/data/{gen}/{ind}/* {path}")
 
 
 def get_trial_info(data, summary, max_gen, fitness):
