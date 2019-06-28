@@ -12,5 +12,5 @@ dependencies:
   - yaml=0.1.7
   - pip:
     - edo==0.2.1
-    - edo-exp==0.0.6
+    - edo-exp==0.0.7
 prefix: /Users/henrywilde/anaconda3/envs/edo-exp
