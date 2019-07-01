@@ -28,6 +28,7 @@ def get_extremes(trial, fitness):
 
         ind, gen = fitness[["individual", "generation"]].iloc[idx, :]
         path = trial / "summary" / case
+        path.mkdir(exist_ok=True)
         os.system(f"cp -r {trial}/data/{gen}/{ind}/* {path}")
 
 
@@ -35,10 +36,8 @@ def get_trial_info(data, summary, max_gen, fitness):
     """ Traverse the trial history and summarise some basic information about
     the individual datasets that have been generated. """
 
-    pop_history = _get_pop_history(data, max_gen + 1)
-
     info_dfs = []
-    for gen, generation in enumerate(pop_history):
+    for gen, generation in enumerate(_get_pop_history(data, max_gen + 1)):
         idxs, nrows, ncols, sizes = [], [], [], []
         for i, (dataframe, _) in enumerate(generation):
             idxs.append(i)
@@ -81,7 +80,7 @@ def summarise_trial(trial, fitness, max_gen, size):
         summary = trial / "summary"
         summary.mkdir(exist_ok=True)
 
-        get_extremes(trial, fitness, max_gen)
+        get_extremes(trial, fitness)
         get_trial_info(data, summary, max_gen, fitness)
         make_tarball(data)
         print(trial, "summarised.")
@@ -90,12 +89,12 @@ def summarise_trial(trial, fitness, max_gen, size):
         print(trial, "incomplete. Moving on.")
 
 
-def main(name, max_gen):
+def main(name, max_gen, root=None):
     """ Crawl through the `root` directory of an experiment and if a trial has
     been completed, summarise the data and make a tarball of it. Otherwise, move
     on. """
 
-    root = Path(f"/scratch/c.c1420099/edo/{name}")
+    root = Path(root) if root is not None else Path(f"experiments/{name}")
 
     try:
         experiments = (
@@ -124,4 +123,8 @@ def main(name, max_gen):
 if __name__ == "__main__":
     NAME = str(sys.argv[1])
     MAX_GEN = int(sys.argv[2])
-    main(NAME, MAX_GEN)
+    ROOT = None
+    if len(sys.argv) == 4:
+        ROOT = str(sys.argv[3])
+
+    main(NAME, MAX_GEN, ROOT)
