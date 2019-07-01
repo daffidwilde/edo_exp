@@ -7,3 +7,6 @@
 *.sh
 *.swp
 *.tar.gz
+
+experiments
+!experiments/README.md
