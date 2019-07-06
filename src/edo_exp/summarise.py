@@ -19,8 +19,8 @@ def get_extremes(trial, fitness):
     min_idx = values.argmin()
     max_idx = values.argmax()
 
-    diff = (values - np.median(values)).abs()
-    median_idx = diff.argmin()
+    diff = np.abs(values - np.median(values))
+    median_idx = np.argmin(diff)
 
     for idx, case in zip(
         [min_idx, median_idx, max_idx], ["min", "median", "max"]
