@@ -10,7 +10,7 @@ import pandas as pd
 from edo.run import _get_pop_history
 
 
-def get_extremes(trial, fitness):
+def get_extremes(data_path, summary_path, trial_fitness):
     """ Get the individuals corresponding to the minimum, median and maximum
     fitness values across all generations, and write them to file. """
 
@@ -26,18 +26,18 @@ def get_extremes(trial, fitness):
         [min_idx, median_idx, max_idx], ["min", "median", "max"]
     ):
 
-        ind, gen = fitness[["individual", "generation"]].iloc[idx, :]
-        path = trial / "summary" / case
-        path.mkdir(exist_ok=True)
-        os.system(f"cp -r {trial}/data/{gen}/{ind}/* {path}")
+        ind, gen = trial_fitness[["individual", "generation"]].iloc[idx, :]
+        case_path = summary_path / case
+        case_path.mkdir(exist_ok=True)
+        os.system(f"cp -r {data_path}/{gen}/{ind}/* {case_path}")
 
 
-def get_trial_info(data, summary, max_gen, fitness):
+def get_trial_info(data_path, summary_path, max_gen, trial_fitness):
     """ Traverse the trial history and summarise some basic information about
     the individual datasets that have been generated. """
 
     info_dfs = []
-    for gen, generation in enumerate(_get_pop_history(data, max_gen + 1)):
+    for gen, generation in enumerate(_get_pop_history(data_path, max_gen + 1)):
         idxs, nrows, ncols, sizes = [], [], [], []
         for i, (dataframe, _) in enumerate(generation):
             idxs.append(i)
@@ -57,64 +57,56 @@ def get_trial_info(data, summary, max_gen, fitness):
         info_dfs.append(info)
 
     info = pd.concat(info_dfs, axis=0, ignore_index=True)
-    info["fitness"] = fitness["fitness"]
-    info.to_csv(summary / "main.csv", index=False)
+    info["fitness"] = trial_fitness["fitness"]
+    info.to_csv(summary_path / "main.csv", index=False)
 
 
-def make_tarball(data):
+def make_tarball(data_path):
     """ Compress the data in `root` to a tarball and remove the original. """
 
-    with tarfile.open(str(data) + ".tar.gz", "w:gz") as tar:
-        tar.add(data, arcname=os.path.basename(data))
+    with tarfile.open(str(data_path) + ".tar.gz", "w:gz") as tar:
+        tar.add(data_path, arcname=os.path.basename(data_path))
 
-    os.system(f"rm -rf {str(data)}")
+    os.system(f"rm -rf {str(data_path)}")
 
 
-def summarise_trial(trial, fitness, max_gen, size):
+def summarise_trial(trial_path):
     """ Summarise a run of an experiment by investigating the shape/size of the
     individuals created, and finding some descriptive individuals in the final
     population. """
 
-    if len(fitness) == (max_gen + 1) * size:
-        data = trial / "data"
-        summary = trial / "summary"
-        summary.mkdir(exist_ok=True)
+    try:
+        data_path = trial_path / "data"
+        trial_fitness = pd.read_csv(data_path / "fitness.csv")
+        size, max_gen = trial_fitness[["individual", "generation"]].max()
 
-        get_extremes(trial, fitness)
-        get_trial_info(data, summary, max_gen, fitness)
-        make_tarball(data)
-        print(trial, "summarised.")
+        if len(trial_fitness) == (max_gen + 1) * size:
+            summary_path = trial_path / "summary"
+            summary_path.mkdir(exist_ok=True)
 
-    else:
-        print(trial, "incomplete. Moving on.")
+            get_extremes(data_path, summary_path, trial_fitness)
+            get_trial_info(data_path, summary_path, max_gen, trial_fitness)
+            make_tarball(data_path)
+            print(trial_path, "summarised.")
+
+        else:
+            print(trial_path, "incomplete. Moving on.")
+
+    except FileNotFoundError:
+        print(trial_path, "already summarised.")
 
 
-def main(name, max_gen, root=None):
+def main(name, root):
     """ Crawl through the `root` directory of an experiment and if a trial has
     been completed, summarise the data and make a tarball of it. Otherwise, move
     on. """
 
-    root = Path(root) if root is not None else Path(f"experiments/{name}")
+    experiment = Path(root) / name
 
     try:
-        experiments = (
-            path
-            for path in root.iterdir()
-            if path.is_dir() and path.name.startswith("size")
-        )
-
-        for experiment in experiments:
-            size = int(experiment.name.split("_")[1])
-            trials = (path for path in experiment.iterdir() if path.is_dir())
-
-            for trial in trials:
-
-                try:
-                    data = trial / "data"
-                    fitness = pd.read_csv(data / "fitness.csv")
-                    summarise_trial(trial, fitness, max_gen, size)
-                except FileNotFoundError:
-                    print(trial, "already summarised.")
+        trial_paths = (path for path in experiment.iterdir() if path.is_dir())
+        for trial_path in trial_paths:
+            summarise_trial(trial_path)
 
     except FileNotFoundError:
         print("Not begun yet.")
@@ -122,9 +114,6 @@ def main(name, max_gen, root=None):
 
 if __name__ == "__main__":
     NAME = str(sys.argv[1])
-    MAX_GEN = int(sys.argv[2])
-    ROOT = None
-    if len(sys.argv) == 4:
-        ROOT = str(sys.argv[3])
+    ROOT = str(sys.argv[2])
 
-    main(NAME, MAX_GEN, ROOT)
+    main(NAME, ROOT)

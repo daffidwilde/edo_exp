@@ -1,12 +1,10 @@
 *.csv
 .DS_Store
 *.egg-info*
+*.hypothesis*
 *.ipynb_checkpoints
 *.meta
 *pyc*
 *.sh
 *.swp
 *.tar.gz
-
-experiments
-!experiments/README.md
