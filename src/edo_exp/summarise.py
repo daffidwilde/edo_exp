@@ -14,7 +14,7 @@ def get_extremes(data_path, summary_path, trial_fitness):
     """ Get the individuals corresponding to the minimum, median and maximum
     fitness values across all generations, and write them to file. """
 
-    values = fitness["fitness"].values
+    values = trial_fitness["fitness"].values
 
     min_idx = values.argmin()
     max_idx = values.argmax()
@@ -58,7 +58,7 @@ def get_trial_info(data_path, summary_path, max_gen, trial_fitness):
 
     info = pd.concat(info_dfs, axis=0, ignore_index=True)
     info["fitness"] = trial_fitness["fitness"]
-    info.to_csv(summary_path / "ain.csv", index=False)
+    info.to_csv(summary_path / "main.csv", index=False)
 
 
 def make_tarball(data_path):
@@ -78,8 +78,10 @@ def summarise_trial(trial_path):
     try:
         data_path = trial_path / "data"
         trial_fitness = pd.read_csv(data_path / "fitness.csv")
-        size, max_gen = trial_fitness[["individual", "generation"]].max()
+        size = trial_fitness["individual"].max() + 1
+        max_gen = trial_fitness["generation"].max()
 
+        print(len(trial_fitness), size, max_gen)
         if len(trial_fitness) == (max_gen + 1) * size:
             summary_path = trial_path / "summary"
             summary_path.mkdir(exist_ok=True)
@@ -101,7 +103,7 @@ def main(experiment_path):
     been completed, summarise the data and make a tarball of it. Otherwise, move
     on. """
 
-    experiment = Path(root)
+    experiment = Path(experiment_path)
 
     try:
         trial_paths = (path for path in experiment.iterdir() if path.is_dir())
