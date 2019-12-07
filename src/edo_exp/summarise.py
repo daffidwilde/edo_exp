@@ -58,7 +58,7 @@ def get_trial_info(data_path, summary_path, max_gen, trial_fitness):
 
     info = pd.concat(info_dfs, axis=0, ignore_index=True)
     info["fitness"] = trial_fitness["fitness"]
-    info.to_csv(summary_path / "main.csv", index=False)
+    info.to_csv(summary_path / "ain.csv", index=False)
 
 
 def make_tarball(data_path):
@@ -96,12 +96,12 @@ def summarise_trial(trial_path):
         print(trial_path, "already summarised.")
 
 
-def main(name, root):
+def main(experiment_path):
     """ Crawl through the `root` directory of an experiment and if a trial has
     been completed, summarise the data and make a tarball of it. Otherwise, move
     on. """
 
-    experiment = Path(root) / name
+    experiment = Path(root)
 
     try:
         trial_paths = (path for path in experiment.iterdir() if path.is_dir())
@@ -113,7 +113,6 @@ def main(name, root):
 
 
 if __name__ == "__main__":
-    NAME = str(sys.argv[1])
-    ROOT = str(sys.argv[2])
+    EXPERIMENT = str(sys.argv[1])
 
-    main(NAME, ROOT)
+    main(EXPERIMENT)
