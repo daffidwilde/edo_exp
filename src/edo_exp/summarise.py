@@ -81,7 +81,6 @@ def summarise_trial(trial_path):
         size = trial_fitness["individual"].max() + 1
         max_gen = trial_fitness["generation"].max()
 
-        print(len(trial_fitness), size, max_gen)
         if len(trial_fitness) == (max_gen + 1) * size:
             summary_path = trial_path / "summary"
             summary_path.mkdir(exist_ok=True)
